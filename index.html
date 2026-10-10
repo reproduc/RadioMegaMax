@@ -1,0 +1,1442 @@
+
+<!DOCTYPE html>     
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Radio MegaMax | En Vivo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:#ffe600;color:#fff;overflow:hidden}
+/* Centrar el valor del MPX */
+#mpxVal {
+  display: flex;
+  justify-content: center; /* centrado horizontal */
+  align-items: center;     /* centrado vertical */
+  height: calc(100% - 20px); /* restar el espacio del título <h4> */
+  font-size: 24px;          /* tamaño visible */
+  color: #ffe600;           /* color del texto MPX */
+  font-weight: bold;
+}
+/* FONDO */
+.bg{
+  position:fixed;inset:0;
+  background:url('https://i.pinimg.com/1200x/ce/0e/4a/ce0e4ad0c52fb95a1686275bb1de0429.jpg') center/cover no-repeat;
+  filter:brightness(.35);
+  z-index:-2;
+}
+.overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(120deg,rgb(4, 6, 75),#00000000);
+  z-index:-1;
+}
+
+/* BOTÓN FULL MODIFICAR ALTURA DEL BOTON  */
+.pc-btn{
+  position:absolute;
+  top:310px; /* ⬅️ antes 20px, ahora más abajo */
+  left:5px;
+  background:rgba(0,0,0,.6);
+  border:1px solid #ffd400;
+  color:#ffd400;
+  padding:5px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* CONTENEDOR */
+.player{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding-bottom:200px;
+}
+
+/* LOGO COLORES CAMBIAR LOGO GRANDE */
+
+.logo-box{
+  position:relative;   /* 🔥 necesario para que las ondas se peguen al logo */
+  background:#ffe600;
+  padding:0px;
+  border-radius:0px;
+  box-shadow:0 0 40px rgb(255,187,0);
+}
+.logo-box img{width:200px}
+
+/* ANIMACIÓN LOGO Y LA ILUMINACION DETRAS DEL LOGO ACA*/
+.logo-box.playing{animation: glow 1s infinite alternate}
+.logo-box.playing img{animation: pulse 1.0s infinite ease-in-out}
+
+@keyframes glow{
+  from{box-shadow:0 0 20px #ffd400}
+  to{box-shadow:0 0 70px #00ffff,0 0 120px #01eeff}
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+
+/* METADATA */
+.meta{margin-top:22px}
+.meta h3{font-size:20px}
+.meta p{font-size:14px;opacity:.85}
+
+.audio-waves {
+
+  position: absolute;
+  top: -70px;        /* más arriba del logo */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 50px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* En desktop */
+@media (min-width: 769px) {
+  .audio-waves {
+    top: -80px;
+    width: 180px;
+    height: 50px;
+  }
+}
+
+/* En móvil */
+@media (max-width: 768px) {
+  .audio-waves {
+    top: -60px;
+    width: 140px;
+    height: 40px;
+  }
+}
+
+.audio-waves.active{opacity:1}
+.audio-waves span{
+  width:2px;
+  height:6px;        /* 🔥 más pequeñas */
+  max-height:30px;   /* 🔥 límite */
+
+}
+  /*animation:equalize 1.1s infinite ease-in-out;*/
+
+@keyframes equalize{
+  0%{height:8px}
+  50%{height:48px}
+  100%{height:12px}
+}
+/* ===== MODOS DE ONDAS ===== */
+
+/* MODO 1 – BARRAS RECTAS */
+.audio-waves.mode-bars span{
+  border-radius:2px;
+}
+
+/* MODO 2 – ONDAS SUAVES */
+.audio-waves.mode-wave span{
+  border-radius:50px;
+  transform-origin:bottom;
+}
+
+/* MODO 3 – PICOS AGRESIVOS */
+.audio-waves.mode-peak span{
+  border-radius:2px;
+  filter:drop-shadow(0 0 8px #ffd400);
+}
+
+/* ===============================
+   ONDAS ELECTRICAS
+
+   
+=============================== */
+
+/* ELECTRIC PULSE */
+.audio-waves.electric-pulse span{
+  background:linear-gradient(180deg,#00ffff,#ffee00,#ff004c);
+  box-shadow:0 0 12px #00ffff;
+  transform:skewX(-8deg);
+  border-radius:2px;
+}
+
+/* NEON ZIGZAG */
+.audio-waves.neon-zigzag span{
+  background:linear-gradient(180deg,#39ff14,#00eaff,#ffe600);
+  box-shadow:0 0 14px #39ff14;
+  border-radius:0;
+  transform:rotate(1deg);
+}
+
+/* LIGHTNING LINE */
+.audio-waves.lightning-line span{
+  background:linear-gradient(180deg,#ffffff,#00c3ff,#0066ff);
+  box-shadow:0 0 18px #00c3ff;
+  border-radius:1px;
+}
+/* 🔥 MODO 5 – CÍRCULOS VIBRANTES NUEVAS ONDAS  */
+.audio-waves.circle-pulse span{
+  border-radius:50%;
+  background:radial-gradient(circle,#00f7ff,#e5ff00);
+  box-shadow:0 0 10px #000000fb;
+}
+
+/* 🔥 MODO 6 – FUEGO */
+.audio-waves.fire span{
+  background:linear-gradient(180deg,#ff0000,#000000,#ffd400);
+  box-shadow:0 0 12px #04ffb4;
+  border-radius:3px;
+}
+
+/* 🔥 MODO 7 – AGUA */
+.audio-waves.water span{
+  background:linear-gradient(180deg,#00cfff,#0044ff);
+  box-shadow:0 0 10px #00cfff;
+  border-radius:20px;
+}
+
+/* 🔥 MODO 8 – MATRIX DIGITAL */
+.audio-waves.matrix span{
+  background:linear-gradient(180deg,#00ff00,#003300);
+  box-shadow:0 0 12px #00ff00;
+  border-radius:1px;
+}
+/* BASE FIJA DESDE ABAJO (ELECTRICIDAD REAL) */
+.audio-waves span{
+  transform-origin: bottom center;
+}
+/* 🔥 MODO 9 – PULSO DOBLE */
+.audio-waves.double-pulse span{
+  background:linear-gradient(180deg,#ff00ff,#00ffff);
+  box-shadow:0 0 14px #ff00ff;
+  border-radius:6px;
+}
+
+/* 🔥 MODO 10 – BARRAS ROTAS */
+.audio-waves.broken-bars span{
+  background:linear-gradient(180deg,#ffd400,#ff004c);
+  box-shadow:0 0 10px #ffd400;
+  border-radius:1px;
+  transform:skewY(-10deg);
+}
+
+/* 🔥 MODO 11 – ONDA NEÓN SUAVE */
+.audio-waves.soft-neon span{
+  background:linear-gradient(180deg,#39ff14,#00ffea);
+  box-shadow:0 0 18px #39ff14;
+  border-radius:50px;
+}
+
+/* 🔥 MODO 12 – IMPACTO GRAVE */
+.audio-waves.bass-impact span{
+  background:linear-gradient(180deg,#ff0000,#000);
+  box-shadow:0 0 20px #ff0000;
+  border-radius:4px;
+}
+/* BARRA */
+.bottom{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:100px;
+  background:linear-gradient(90deg,#000,#190d5e,#000);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 25px;
+}
+.bottom.playing{
+  background:linear-gradient(270deg,#ff0303,#000000,#0e22d3,#0406799a,#000000);
+  background-size:600% 600%;
+  animation:rgb 6s ease infinite;
+  box-shadow:0 -5px 30px rgba(37, 121, 2, 0);
+}
+@keyframes rgb{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+.left{display:flex;align-items:center;gap:10px}
+.left img{width:44px;border-radius:50%}
+
+.center{display:flex;align-items:center;gap:14px}
+
+.play{
+  width:56px;height:56px;border-radius:50%;
+  background:#ffee00;border:none;
+  font-size:22px;cursor:pointer;
+}
+
+/* VOLUMEN */
+.volume-box{
+    display:flex;
+    align-items:center;
+    gap:4px;            /* menos separación */
+    transform: scale(0.8); /* reduce tamaño general */
+}
+
+.volume-box i{
+    color:#ffd400;
+    font-size:12px;     /* ícono más pequeño */
+}
+
+/* Si usas input range para el volumen */
+.volume-box input[type="range"]{
+    width:90px;         /* barra más corta */
+    height:30px;         /* barra más delgada */
+}
+/* REDES PC */
+.social-bottom{display:flex;gap:12px}
+.social-bottom a{color:#00ff55;font-size:20px}
+
+/* REDES CELULAR */
+.social-mobile{
+  position:fixed;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  z-index:999;
+}
+.social-mobile a{
+  width:42px;height:42px;
+  background:#000000cc;
+  color:#3cff00;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  font-size:18px;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){.social-bottom{display:none}}
+@media(min-width:769px){.social-mobile{display:none}}
+
+/* =======================
+   ONDAS RESPONSIVAS
+======================= */
+
+/* ALTURA DE ONDAS SONORAS PARA VISUALIZAR EN COMPUTADORA */
+@media (min-width: 769px) {
+.audio-waves{
+  position:absolute;
+  bottom:115%;          /* 🔥 se coloca encima del logo */
+  left:50%;
+  transform:translateX(-50%);
+  width:160px;          /* ancho similar al círculo */
+  height:35px;          /* pequeñas */
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:2px;
+  opacity:0;
+  pointer-events:none;
+  transition:.5s;
+  z-index:10;
+}
+/* MODIFICAR ALTURA DE ONDAS PARA NO ROSE EL LOGO O EL NOMBRE DE LA CANCION*/
+.audio-waves span{
+  width:2px;
+  height:6px;
+  max-height:20px;
+}
+.level-container{
+  justify-content:center;
+  gap:3px;
+}
+
+.level-container .meter{
+  width:8px;
+  height:100%;
+}
+
+}
+/* CELULAR */
+@media (max-width: 768px) {
+  /* =========================
+   BOTÓN ONDAS RESPONSIVO
+========================= */
+
+#waveBtn{
+  background:#000;
+  color:#ffd400;
+  border:1px solid #ffd400;
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+/* 💻 COMPUTADORA → DENTRO DE LA BARRA */
+@media (min-width: 769px){
+  #waveWrapper{
+    position:static;
+    display:flex;
+  }
+}
+
+/* 📱 CELULAR → FLOTANTE AL COSTADO */
+@media (max-width: 768px){
+  #waveWrapper{
+    position:fixed;
+    left: 5px;     /* ✅ lado izquierdo */
+    right: auto;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:9999;
+  }
+
+  #waveBtn{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    box-shadow:0 0 15px #9eff01;
+  }
+}
+  .audio-waves{
+    height:110px;
+    bottom:135px;   /* exacto encima de la barra */
+    gap:3px;
+    padding:0 12px;
+  }
+
+  .audio-waves span{
+  max-width:6px;
+  max-height:50px;
+}
+}
+
+/* 🎵 MARCO CANCION ACTUAL */
+.song-frame{
+  
+  margin-top:14px;
+  padding:10px 16px;
+  background:linear-gradient(135deg,#000,#1a1a1a);
+  border:1px solid #ffd400;
+  border-radius:14px;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 0 18px rgba(255,215,0,.6);
+  max-width:90%;
+}
+
+/* ICONO */
+.song-frame i{
+  color:#ffd400;
+  font-size:18px;
+}
+
+/* TEXTO CANCION */
+.song-frame span{
+  font-size:14px;
+  font-weight:600;
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:240px;
+}
+
+/* 📱 CELULAR */
+@media(max-width:768px){
+  .song-frame span{
+    max-width:180px;
+    font-size:13px;
+  }
+}
+
+/* ✍️ EFECTO TEXTO ESCRIBIÉNDOSE */
+.typewriter {
+  border-right: 2px solid #ffd400;
+  animation: blinkCursor 0.8s steps(1) infinite;
+}
+
+@keyframes blinkCursor {
+  50% { border-color: transparent; }
+}
+
+/* 🔥 MARCO MÁS GRANDE Y RESPONSIVE */
+.song-frame{
+  padding:14px 22px;
+  border-radius:18px;
+}
+
+/* 💻 PC */
+@media(min-width:769px){
+  .song-frame{
+    max-width:800px;
+  }
+    .song-marquee{
+    animation-duration: 16s;
+  }
+}
+/* 📱 CELULAR */
+@media(max-width:768px){
+ .song-marquee{
+    animation-duration: 7s;
+  }
+}
+/* 🎶 TEXTO DESLIZANTE DE CANCION */
+.song-frame{
+  overflow:hidden;
+}
+
+.song-marquee{
+  display:inline-block;
+  white-space:nowrap;
+  animation: slideInside 16s linear infinite;
+}
+@keyframes slideInside{
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+/* 📱 CELULAR más lento */
+@media(max-width:768px){
+  .song-marquee{
+    animation-duration:10s;
+  }
+}
+
+/* 📱 CELULAR – MARCO DE CANCIÓN MÁS PEQUEÑO */
+@media (max-width: 768px){
+  .song-frame{
+    padding:6px 10px;        /* más compacto */
+    border-radius:12px;
+    gap:6px;
+    box-shadow:0 0 10px rgba(255,215,0,.5);
+  }
+
+  .song-frame i{
+    font-size:14px;
+  }
+
+  .song-frame span{
+    font-size:12px;          /* texto más chico */
+    max-width:160px;         /* ancho reducido */
+  }
+}
+
+/*CODIGO DE STYLE DE EL MEDIDOR DE MUSICA QUE VOY A AGREGAR*/
+/* ===== PANEL AUDIO MONITOR ENCIMA DE LA BARRA ===== */
+.monitor-wrapper{
+  position:fixed;
+  bottom:125px; /* justo encima de la barra */
+  left:50%;
+  transform:translateX(-50%);
+  width:95%;
+  max-width:900px;
+  z-index:50;
+  pointer-events:none;
+}
+
+/* ===== MONITOR EN FILA PC ===== */
+.monitor{
+  display:grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: 100px; /* un poco más alto */
+  gap:6px;
+}
+/* 💻 PC NORMAL */
+@media (min-width:769px){
+  .monitor-wrapper{
+    bottom:100px;   /* baja el panel sobre la barra */
+  }
+}
+
+/* 🖥️ PC EN PANTALLA COMPLETA */
+body.fullscreen .monitor-wrapper{
+  bottom:120px;   /* mantiene espacio con el cuadro de la canción */
+}
+
+body.fullscreen .monitor{
+  grid-auto-rows: 180px; /* altura de los paneles */
+}
+.monitor .panel{
+  background:#111;
+  border:1px solid #333;
+  box-shadow:0 0 10px #000 inset;
+  padding:4px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.monitor h4{
+  font-size:10px;
+  color:#aaa;
+  margin-bottom:3px;
+}
+
+.meter{
+  width:16px;
+  height:80px;
+  body.fullscreen .meter{
+  height:100%;
+}
+  background:#000;
+  border:1px solid #444444;
+  position:relative;
+  margin-right:4px;
+}
+
+.meter-fill{
+  position:absolute;
+  bottom:8;
+  width:100%;
+  height:10%;
+  background:linear-gradient(to top,rgb(255, 153, 0),rgb(225, 0, 255),rgb(255, 251, 0));
+}
+
+.spectrum{
+  height:80px;
+
+  display:flex;
+  align-items:flex-end;
+  gap:1px;
+}
+
+.bar{
+  width:4px;
+  height:5px;
+  background:linear-gradient(to top,rgb(255, 0, 0),rgb(238, 255, 0));
+}
+
+.panel canvas{
+  width:100%;
+  height:calc(100% - 16px); /* resta el espacio del título */
+  display:block;
+  
+}
+
+/* 📱 CELULAR */
+/* 📱 CELULAR – MONITOR MÁS PEQUEÑO Y SIN TOCAR METADATA */
+@media(max-width:768px){
+.monitor{
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 80px;
+}
+
+
+  /* 📱 modo normal */
+  .monitor-wrapper{
+    bottom:120px; /* pequeño espacio */
+    width:96%;
+    transition:0.3s;
+  }
+
+  /* 📱 pantalla completa → pegado a la barra */
+  body.fullscreen .monitor-wrapper{
+    bottom:100px; /* EXACTO alto de la barra */
+  }
+/* 📱 CELULAR – altura de paneles en pantalla completa */
+body.fullscreen .monitor{
+  grid-auto-rows: 90px; /* mantiene la altura normal en celular */
+}
+
+
+  .monitor .panel{
+    padding:4px;
+  }
+
+  .monitor h4{
+    font-size:9px;
+  }
+
+  .meter{
+    height:60px;
+  }
+
+  .spectrum{
+    height:100px;
+  }
+}
+
+
+/* 📌 SUBIR METADATA SOLO EN MODO NORMAL */
+.meta{
+  margin-top:20px;
+}
+
+/* 📌 CUANDO ESTÁ EN PANTALLA COMPLETA → REGRESA A SU POSICIÓN ORIGINAL */
+body.fullscreen .meta{
+  margin-top:18px; /* ← el valor original que ya tenías */
+}
+
+
+/* 🎵 SUBIR SOLO EL CUADRO DE LA CANCIÓN EN MODO NORMAL */
+
+.song-frame{         /* 🔼 súbelo hasta que roce el texto 106.9 */
+  margin-top:10px;
+}
+/* 🖥️ EN PANTALLA COMPLETA → REGRESA A SU POSICIÓN ORIGINAL */
+body.fullscreen .song-frame{
+  margin-top:14px; /* ← tu valor original */
+}
+
+/* 🎵 CUADRO CANCIÓN MÁS DELGADO EN MODO NORMAL */
+.song-frame{
+  padding:6px 12px;   /* 🔽 más delgado */
+  border-radius:12px;
+  transition:0.3s;
+}
+
+/* 🖥️ PANTALLA COMPLETA → REGRESA A SU TAMAÑO ORIGINAL */
+body.fullscreen .song-frame{
+  padding:14px 22px;  /* ← tu tamaño original */
+  border-radius:18px;
+}
+
+/* ===============================
+   AJUSTE MONITOR EN PANTALLA COMPLETA
+=============================== */
+
+body.fullscreen .monitor .panel{
+  padding:0; /* elimina espacio interno */
+}
+
+body.fullscreen .monitor h4{
+  margin:0;
+  padding:2px 0;
+}
+
+body.fullscreen .panel canvas{
+  height:100%;
+}
+
+body.fullscreen .spectrum{
+  height:100%;
+  align-items:flex-end;
+}
+
+/* ===========================
+   LEVEL FULL PC
+=========================== */
+
+@media (min-width:769px){
+
+  body.fullscreen .panel:first-child .meter{
+    height:100%;          /* llena todo el cuadro */
+  }
+
+  body.fullscreen .panel:first-child{
+    display:flex;
+    flex-direction:column;
+  }
+
+  body.fullscreen .panel:first-child > div{
+    flex:1;
+    align-items:flex-end;
+  }
+.level-container{
+  display:flex;
+  align-items:flex-end;
+  height:100%;
+}
+
+.pc-only{
+  display:none;
+}
+
+@media (min-width:769px){
+  .pc-only{
+    display:block;
+  }
+}
+
+/* ===============================
+   LEVEL RESPONSIVO 6 BARRAS
+=============================== */
+
+.level-container{
+  display:flex;
+  align-items:flex-end;     /* desde abajo */
+  justify-content:center;   /* centrado */
+  gap:4px;
+  height:100%;
+  width:100%;
+}
+
+/* PANEL SIN ESPACIOS */
+.monitor .panel{
+  padding:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.panel:first-child > .level-container{
+  flex:1;
+}
+
+/* =========================
+   📱 CELULAR NORMAL
+========================= */
+@media (max-width:768px){
+
+  .level-container .meter{
+    width:6px;       /* más delgadas */
+    height:100%;
+  }
+
+}
+
+/* =========================
+   💻 PC NORMAL
+========================= */
+@media (min-width:769px){
+
+  .level-container .meter{
+    width:10px;
+    height:100%;
+  }
+
+}
+
+/* =========================
+   🖥️ PANTALLA COMPLETA
+========================= */
+body.fullscreen .level-container .meter{
+  width:18px;
+  height:85%;  /* reduce altura para que no roce la canción */
+}
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="overlay"></div>
+
+<button class="pc-btn" onclick="toggleFull()">🖥️</button>
+
+
+
+<div class="player">
+  <div class="logo-box" id="logoBox">
+      <!-- ONDAS ENCIMA DEL LOGO -->
+  <div class="audio-waves" id="waves">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+<span></span> <!-- todas tus barras --> </div>
+<img src="https://raw.githubusercontent.com/reproduc/RadioPlayerPeru/refs/heads/main/assets/Radio%20MEGAMAX%20Si%C3%A9ntela%20500.png"> </div>
+
+<div class="meta"> 
+  <h3>RADIO MEGAMAX</h3>
+  
+  <p>"SE SIENTE"</p>
+<div class="song-frame">
+  <i class="fas fa-music"></i>
+<span id="songTitle">🎵 Cargandoo en vivo</span>
+</div>
+</div>
+</div>
+
+
+<!-- 🔊 PANEL AUDIO MONITOR -->
+<div class="monitor-wrapper">
+  <div class="monitor">
+
+<div class="panel">
+  <h4>Level</h4>
+  <div class="level-container">
+    <div class="meter"><div class="meter-fill" id="m1"></div></div>
+    <div class="meter"><div class="meter-fill" id="m2"></div></div>
+    <div class="meter"><div class="meter-fill" id="m3"></div></div>
+    <div class="meter"><div class="meter-fill" id="m4"></div></div>
+    <div class="meter"><div class="meter-fill" id="m5"></div></div>
+    <div class="meter"><div class="meter-fill" id="m6"></div></div>
+  </div>
+</div>
+
+
+    <div class="panel">
+      <h4>Wave</h4>
+      <canvas id="wave"></canvas>
+    </div>
+
+    <div class="panel">
+      <h4>MPX</h4>
+      <div id="mpxVal">0.0</div>
+    </div>
+
+    <div class="panel">
+      <h4>Spectrum</h4>
+      <div class="spectrum" id="spectrum"></div>
+    </div>
+
+    <div class="panel">
+      <h4>Scope</h4>
+      <canvas id="scope"></canvas>
+    </div>
+
+    <div class="panel">
+      <h4>MPX Out</h4>
+      <canvas id="mpxWave"></canvas>
+    </div>
+
+  </div>
+</div>  
+
+<div class="bottom" id="bottomBar">
+  <div class="left">
+    <img src="https://raw.githubusercontent.com/reproduc/RadioPlayerPeru/refs/heads/main/assets/Radio%20MEGAMAX%20Si%C3%A9ntela%20500.png">
+    <div>
+      <strong>Radio MegaMax</strong><br>
+      <small>Lima - Peru</small>
+    </div>
+  </div>
+
+  <div class="center">
+    <button class="play" id="playBtn"><i class="fas fa-play"></i></button>
+  <div id="waveWrapper">
+  <button id="waveBtn">🎚️</button>
+</div>
+    <div class="volume-box">
+      <i class="fas fa-volume-up"></i>
+      <input type="range" min="0" max="1" step="0.01" value="1" id="volume">
+    </div>
+  </div>
+
+  <!-- REDES PC -->
+  <div class="social-bottom">
+    <a href="https://www.facebook.com/share/16oH7azmvS/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.instagram.com/antena_dorada01?igsh=MXFrMDN2YmRpYzJmeQ==" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+    <a href="https://www.tiktok.com/@radioantenadorada106.9fm?_r=1&_t=ZS-92rWiBpFAVJ" target="_blank" rel="noopener noreferrer"><i class="fab fa-tiktok"></i></a>
+    <a href="https://www.youtube.com/@musiccreado" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+  </div>
+</div>
+
+<!-- REDES CELULAR -->
+<div class="social-mobile">
+  <a href="https://www.facebook.com/share/16oH7azmvS/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+  <a href="https://www.instagram.com/antena_dorada01?igsh=MXFrMDN2YmRpYzJmeQ==" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+  <a href="https://www.tiktok.com/@radioantenadorada106.9fm?_r=1&_t=ZS-92rWiBpFAVJ" target="_blank" rel="noopener noreferrer"><i class="fab fa-tiktok"></i></a>
+  <a href="https://www.youtube.com/@musiccreado" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+</div>
+
+<audio id="radio" crossorigin="anonymous">
+  <source src="https://stream-177.surfernetwork.com/ad4geef2rxhvv?zt=" type="audio/mpeg">
+</audio>
+<script>
+
+const radio=document.getElementById("radio");
+const playBtn=document.getElementById("playBtn");
+const volume=document.getElementById("volume");
+const bottom=document.getElementById("bottomBar");
+const waves=document.getElementById("waves");
+const logoBox=document.getElementById("logoBox");
+
+let playing=false;
+
+playBtn.onclick = async () => {
+  if (!playing) {
+
+    refreshStream();
+
+    // 🔊 Crear contexto si no existe
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    await audioCtx.resume();
+
+    // 🔊 Iniciar ondas (crea source y analyser)
+    initAudioWaves();
+
+    // 🔊 Iniciar monitor (usa el mismo source)
+    initMonitor();
+
+    await radio.play();
+
+    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    bottom.classList.add("playing");
+// Mostrar ondas SOLO si estamos en fullscreen
+if (document.fullscreenElement) {
+  waves.classList.add("active");
+} else {
+  waves.classList.remove("active");
+}
+    logoBox.classList.add("playing");
+
+  } else {
+
+    radio.pause();
+
+    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+    bottom.classList.remove("playing");
+    waves.classList.remove("active");
+    logoBox.classList.remove("playing");
+  }
+
+  playing = !playing;
+};
+volume.oninput=()=>radio.volume=volume.value;
+
+async function toggleFull(){
+
+  if(!document.fullscreenElement){
+    await document.documentElement.requestFullscreen();
+    document.body.classList.add("fullscreen");
+  }else{
+    await document.exitFullscreen();
+    document.body.classList.remove("fullscreen");
+  }
+
+  // 🔊 asegurar que siga reproduciendo
+  if(playing){
+    radio.play().catch(()=>{});
+  }
+}
+/* === ONDAS AL RITMO DE LA MUSICA (STREAM FIX) === */
+
+let audioCtx;
+let analyser;
+let source;
+let dataArray;
+let bufferLength;
+let wavesStarted = false;
+const isDesktop = window.innerWidth >= 769;
+
+function initAudioWaves(){
+  if(wavesStarted) return;
+
+if(!audioCtx){
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;  /* === ACA CAMBIAMOS LA VELOCIDAD OJOLO 256 O 128 O 64 === */
+analyser.smoothingTimeConstant = 0.15;
+
+  bufferLength = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLength);
+
+  source = audioCtx.createMediaElementSource(radio);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  wavesStarted = true;
+  animateWaves();
+}
+
+const bars = document.querySelectorAll("#waves span");
+let waveStyle = 1;
+
+/* === CAMBIO DE ESTILO DE ONDAS === */
+
+const waveBtn = document.getElementById("waveBtn");
+const waveContainer = document.getElementById("waves");
+
+const waveModes = [
+  "lightning-line",   // 4️⃣ rayo
+  "circle-pulse",     // 5️⃣ círculos
+  "mode-bars",        // 1️⃣ barras normales
+   
+  
+
+
+
+];
+let currentMode = 0;
+
+/* modo inicial */
+waveContainer.classList.add(waveModes[currentMode]);
+
+waveBtn.onclick = () => {
+  waveContainer.classList.remove(waveModes[currentMode]);
+  currentMode = (currentMode + 1) % waveModes.length;
+  waveContainer.classList.add(waveModes[currentMode]);
+};
+
+function animateWaves(){
+  requestAnimationFrame(animateWaves);
+  analyser.getByteFrequencyData(dataArray);
+// 🔊 ENERGÍA PROMEDIO GENERAL
+let totalEnergy = 0;
+for(let i = 0; i < bufferLength; i++){
+  totalEnergy += dataArray[i];
+}
+const avgEnergy = totalEnergy / bufferLength;
+
+// 🎚️ intensidad máxima del movimiento lateral
+const maxSpread = 22;
+ bars.forEach((bar, i) => {
+  // 🎯 centro del visualizador
+const centerIndex = Math.floor(bars.length / 2);
+// índice real del audio
+const index = Math.floor(i * bufferLength / bars.length);
+
+// energía propia
+let value = dataArray[index];
+
+// 🔥 energía central dominante
+const centerEnergy =
+  dataArray[Math.floor(centerIndex * bufferLength / bars.length)];
+
+// 📏 distancia al centro (0 = centro)
+const distanceFromCenter = Math.abs(i - centerIndex) / centerIndex;
+
+// 🎚️ mezcla: centro fuerte → lados más suaves
+value = value * (1 - distanceFromCenter) + centerEnergy * distanceFromCenter;
+
+    // 🔥 VIDA MINIMA PARA TODAS LAS BARRAS
+   const minEnergy = 30;
+value = Math.max(value, minEnergy);
+
+// 🎶 pulso global (respiración)
+value += avgEnergy * 0.45;
+
+// 🎶 empuje rítmico mínimo (para ondas muertas)
+const pulse = avgEnergy * 0.35;
+value += pulse;
+
+    // 🔊 REALCE PROGRESIVO (las del final no mueren)
+    const boost = 1 + (i / bars.length) * 0.50;
+
+    // 🎚️ ALTURA FINAL DE LAS ONDAS SONORAS
+   let height = value * (isDesktop ? 1.4 : 2.1) * boost;
+
+    bar.style.height = height + 'px';
+
+
+if(currentMode === 0){ // barras
+  height = Math.max(30, value * 2);
+}
+
+
+if(currentMode === 0){ // lightning-line
+  height = Math.max(35, value * 2.2);
+}
+else if(currentMode === 1){ // circle-pulse
+  height = Math.max(25, value * 1.8);
+}
+else if(currentMode === 2){ // mode-bars
+  height = Math.max(30, value * 2);
+}
+
+/* vibración eléctrica */
+// 🔁 MOVIMIENTO SIMÉTRICO IZQ ↔ CENTRO ↔ DER
+const center = bars.length / 2;
+
+// dirección según posición
+const direction = i < center ? -1 : 1;
+
+// fuerza según distancia al centro
+const distanceFactor = Math.abs(i - center) / center;
+
+// movimiento lateral al ritmo del audio
+// 🔁 MOVIMIENTO BASE (aunque no haya picos)
+const baseMove = 4;
+
+// 🔁 movimiento total forzado
+const moveX =
+  direction *
+  distanceFactor *
+  (
+    baseMove +
+    (avgEnergy / 255) * maxSpread
+  );
+
+// aplicar transformación
+bar.style.transform = `
+  translateX(${moveX}px)
+  scaleY(${height / 250})
+  
+`;
+const microShake = Math.sin(Date.now() / 140 + i) * 1.5;
+    bar.style.height = height + "px";
+  });
+}
+
+/* === METADATA AZURACAST (FUNCIONA DE VERDAD) === */
+
+const songEl = document.getElementById("songTitle");
+function setMarqueeText(text){
+  songEl.innerHTML = `<span class="song-marquee">${text}</span>`;
+}
+
+let typingInterval;
+let lastText = "";
+
+function typeText(element, text, speed = 35){
+  if(element.scrollWidth > element.parentElement.clientWidth){
+  element.innerHTML = `
+    <span class="song-marquee" style="animation: none;">
+      ${text}
+    </span>
+  `;
+
+  const marquee = element.querySelector(".song-marquee");
+
+  // ⏱️ fuerza reinicio limpio
+  setTimeout(() => {
+    marquee.style.animation = "slideInside 14s linear infinite";
+  }, 50);
+}
+
+  clearInterval(typingInterval);
+  element.className = "";
+  element.textContent = "";
+
+  let i = 0;
+  typingInterval = setInterval(() => {
+    element.textContent += text.charAt(i);
+    i++;
+
+    if(i >= text.length){
+      clearInterval(typingInterval);
+
+      setTimeout(() => {
+        // 👉 solo activar desplazamiento si no cabe
+        if(element.scrollWidth > element.parentElement.clientWidth){
+          element.innerHTML = `<span class="song-marquee">${text}</span>`;
+          adjustMarquee(element.querySelector(".song-marquee"));
+        }
+      }, 300);
+    }
+  }, speed);
+
+}
+async function loadMetadata(){
+  try{
+const res = await fetch(
+  "https://api.zeno.fm/stations/ad4geef2rxhvv/nowplaying",
+  { cache: "no-store" }
+);
+
+    const data = await res.json();
+
+    let text = "🎵 En vivo"; // texto por defecto
+
+if (data.now_playing) {
+  const song = data.now_playing;
+
+  if (song.title && song.artist) {
+    text = `🎶 ${song.artist} – ${song.title}`;
+  } else if (song.title) {
+    text = `🎶 ${song.title}`;
+  }
+}
+
+   if(text !== lastText){
+  lastText = text;
+  typeText(songEl, text);
+}
+
+  } catch (err) {
+    console.error("AzuraCast metadata error:", err);
+    typeText(songEl, "🎵 En vivo");
+  }
+}
+
+// cargar metadata cada 10 segundos
+loadMetadata();
+setInterval(loadMetadata, 15000);
+function refreshStream(){
+  radio.pause();
+  radio.currentTime = 0;
+
+  const src = radio.querySelector("source");
+
+  // 🔥 FORZAR NUEVA URL SIN CACHÉ
+  src.src = "https://stream-177.surfernetwork.com/ad4geef2rxhvv?nocache=" + Date.now();
+
+  radio.load();   // 🔥 OBLIGATORIO
+}
+/* ===== MONITOR DE AUDIO PRO ===== */
+
+let monitorAnalyser;
+let monitorDataFreq;
+let monitorDataTime;
+let monitorStarted = false;
+
+const waveCanvas = document.getElementById("wave");
+const waveCtx = waveCanvas.getContext("2d");
+
+const scopeCanvas = document.getElementById("scope");
+const scopeCtx = scopeCanvas.getContext("2d");
+
+const mpxCanvas = document.getElementById("mpxWave");
+const mpxCtx = mpxCanvas.getContext("2d");
+
+function resizeMonitor(){
+  [waveCanvas,scopeCanvas,mpxCanvas].forEach(c=>{
+    c.width=c.clientWidth;
+    c.height=c.clientHeight;
+  });
+}
+resizeMonitor();
+window.addEventListener("resize",resizeMonitor);
+
+function initMonitor(){
+
+if(monitorStarted) return;
+if(!audioCtx || !source) return;
+  monitorAnalyser = audioCtx.createAnalyser();
+  monitorAnalyser.fftSize = 2048;
+
+  source.connect(monitorAnalyser);
+
+  monitorDataFreq = new Uint8Array(monitorAnalyser.frequencyBinCount);
+  monitorDataTime = new Uint8Array(monitorAnalyser.fftSize);
+
+  createSpectrumBars();
+  drawMonitor();
+
+  monitorStarted = true;
+}
+
+function createSpectrumBars(){
+  const spectrum = document.getElementById("spectrum");
+  if(spectrum.children.length) return;
+
+  for(let i=0;i<32;i++){
+    const bar=document.createElement("div");
+    bar.className="bar";
+    spectrum.appendChild(bar);
+  }
+}
+
+function drawMonitor(){
+  requestAnimationFrame(drawMonitor);
+  if(!monitorAnalyser) return;
+
+  monitorAnalyser.getByteFrequencyData(monitorDataFreq);
+  monitorAnalyser.getByteTimeDomainData(monitorDataTime);
+
+  let sum=0;
+  for(let i=0;i<monitorDataFreq.length;i++) sum+=monitorDataFreq[i];
+  let avg=sum/monitorDataFreq.length;
+
+document.getElementById("m1").style.height=(avg/2)+"%";
+document.getElementById("m2").style.height=(avg/2.5)+"%";
+document.getElementById("m3").style.height=(avg/1.8)+"%";
+document.getElementById("m4").style.height=(avg/2.2)+"%";
+document.getElementById("m5").style.height=(avg/1.6)+"%";
+document.getElementById("m6").style.height=(avg/2.8)+"%";
+
+  const bars=document.querySelectorAll(".bar");
+  for(let i=0;i<bars.length;i++){
+    bars[i].style.height=(monitorDataFreq[i]/3)+"px";
+  }
+
+  drawWave(waveCtx,waveCanvas,monitorDataTime);
+  drawWave(scopeCtx,scopeCanvas,monitorDataTime);
+  drawWave(mpxCtx,mpxCanvas,monitorDataTime);
+
+  document.getElementById("mpxVal").textContent=(avg/10).toFixed(1);
+}
+
+function drawWave(ctx,canvas,data){
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.strokeStyle="#00ff00";
+  ctx.lineWidth=1;
+  ctx.beginPath();
+
+  let slice = canvas.width / data.length;
+  let x = 0;
+
+  for(let i=0;i<data.length;i++){
+    let v = data[i] / 255;
+    let y = (1 - v) * canvas.height;
+
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+
+    x += slice;
+  }
+
+  ctx.stroke();
+}
+
+
+document.addEventListener("fullscreenchange", () => {
+
+  if (!document.fullscreenElement) {
+
+    document.body.classList.remove("fullscreen");
+
+    // 🔄 reajustar tamaños del monitor
+    resizeMonitor();
+
+    // 🔊 si estaba sonando, asegurar que continúe
+    if (playing && radio.paused) {
+      radio.play().catch(()=>{});
+    }
+
+  }
+
+});
+
+document.addEventListener("fullscreenchange", () => {
+  if(document.fullscreenElement){
+    // Estamos en fullscreen, mostrar ondas si está reproduciendo
+    if(playing){
+      waves.classList.add("active");
+    }
+  } else {
+    // Salimos de fullscreen → ocultar ondas
+    waves.classList.remove("active");
+  }
+});
+const songTitle = document.getElementById("songTitle");
+
+
+
+async function getMetadata(){
+  try{
+    const res = await fetch(
+      "https://api.zeno.fm/mounts/metadata/nowplaying/ad4geef2rxhvv"
+    );
+    const data = await res.json();
+
+    if(data && data.title && data.title !== "Unknown"){
+      songTitle.innerHTML =
+        '<span class="song-marquee">🎵 ' + data.title + '</span>';
+    }else{
+      songTitle.textContent = "🎵 EN VIVO DESDE CABINA";
+    }
+
+  }catch{
+    songTitle.textContent = "🎵 RADIO MEGAMAX EN VIVO";
+  }
+}
+
+setInterval(getMetadata, 10000);
+getMetadata();
+
+</script>
+
+</body>
+</html>
