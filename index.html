@@ -970,7 +970,7 @@ body.fullscreen .level-container .meter{
 </div>
 
 <audio id="radio" crossorigin="anonymous">
-  <source src="https://stream-177.surfernetwork.com/ad4geef2rxhvv?zt=" type="audio/mpeg">
+  <source src="https://stream.zeno.fm/ad4geef2rxhvv" type="audio/mpeg">
 </audio>
 <script>
 
@@ -1293,7 +1293,7 @@ function refreshStream(){
   const src = radio.querySelector("source");
 
   // 🔥 FORZAR NUEVA URL SIN CACHÉ
-  src.src = "https://stream-177.surfernetwork.com/ad4geef2rxhvv?nocache=" + Date.now();
+  src.src = "https://stream.zeno.fm/ad4geef2rxhvv?nocache=" + Date.now();
 
   radio.load();   // 🔥 OBLIGATORIO
 }
@@ -1442,7 +1442,7 @@ const songTitle = document.getElementById("songTitle");
 async function getMetadata(){
   try{
     const res = await fetch(
-      "https://zenoplay.zenomedia.com/api/zenofm/nowplaying/ad4geef2rxhvv"
+      "https://api.zeno.fm/mounts/metadata/subscribe/ad4geef2rxhvv"
     );
     const data = await res.json();
 
