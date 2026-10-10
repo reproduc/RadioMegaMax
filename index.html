@@ -1254,7 +1254,7 @@ function typeText(element, text, speed = 35){
 async function loadMetadata(){
   try{
 const res = await fetch(
-  "https://api.zeno.fm/stations/ad4geef2rxhvv/nowplaying",
+  "https://zenoplay.zenomedia.com/api/zenofm/nowplaying/ad4geef2rxhvv",
   { cache: "no-store" }
 );
 
@@ -1442,7 +1442,7 @@ const songTitle = document.getElementById("songTitle");
 async function getMetadata(){
   try{
     const res = await fetch(
-      "https://api.zeno.fm/mounts/metadata/nowplaying/ad4geef2rxhvv"
+      "https://zenoplay.zenomedia.com/api/zenofm/nowplaying/ad4geef2rxhvv"
     );
     const data = await res.json();
 
