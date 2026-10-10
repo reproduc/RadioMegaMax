@@ -1254,7 +1254,7 @@ function typeText(element, text, speed = 35){
 async function loadMetadata(){
   try{
 const res = await fetch(
-  "https://api.zeno.fm/mounts/metadata/subscribe/mqedovlpc6uvv",
+  "https://zenoplay.zenomedia.com/api/zenofm/nowplaying/ad4geef2rxhvv",
   { cache: "no-store" }
 );
 
@@ -1293,7 +1293,7 @@ function refreshStream(){
   const src = radio.querySelector("source");
 
   // 🔥 FORZAR NUEVA URL SIN CACHÉ
-  src.src = "https://stream-177.surfernetwork.com/ad4geef2rxhvv?nocache=" + Date.now();
+  src.src = "https://zenoplay.zenomedia.com/api/zenofm/nowplaying/ad4geef2rxhvv?nocache=" + Date.now();
 
   radio.load();   // 🔥 OBLIGATORIO
 }
