@@ -1293,7 +1293,8 @@ function refreshStream(){
   const src = radio.querySelector("source");
 
   // 🔥 FORZAR NUEVA URL SIN CACHÉ
-  src.src = "https://stream.zeno.fm/ad4geef2rxhvv?nocache=" + Date.now();
+  src.src = "https://zenoplay.zenomedia.com/api/zenofm/nowplaying/ad4geef2rxhvv
+?nocache=" + Date.now();
 
   radio.load();   // 🔥 OBLIGATORIO
 }
